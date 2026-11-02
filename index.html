@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCircle - Media Pembelajaran Interaktif Sudut Lingkaran</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#06b6d4',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                            yellow: '#f59e0b',
+                            green: '#10b981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-400 via-indigo-500 to-purple-600 min-h-screen font-sans text-slate-800 antialiased selection:bg-brand-purple selection:text-white">
+
+    <!-- APP CONTAINER -->
+    <div id="app" class="min-h-screen flex flex-col justify-between relative overflow-hidden">
+
+        <!-- 1. SPLASH SCREEN -->
+        <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-800 text-white p-6">
+            <div class="text-center max-w-md w-full">
+                <!-- Logo Animation -->
+                <div class="relative w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-white/40 animate-spin" style="animation-duration: 12s;"></div>
+                    <div class="absolute inset-2 rounded-full border-4 border-pink-400/60 animate-ping" style="animation-duration: 3s;"></div>
+                    <div class="w-24 h-24 rounded-full bg-white text-indigo-600 flex items-center justify-center text-4xl shadow-2xl z-10 font-bold">
+                        <i class="fa-solid me-1 fa-shapes text-indigo-600"></i>
+                    </div>
+                </div>
+                
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">EduCircle</h1>
+                <p class="text-blue-100 text-sm sm:text-base mb-8">Media Pembelajaran Interaktif Matematika<br><span class="font-semibold text-yellow-300">Sudut Pusat & Sudut Keliling</span></p>
+
+                <!-- Loading Bar Container -->
+                <div id="loading-box" class="w-full bg-white/20 rounded-full p-1.5 mb-4 backdrop-blur-md border border-white/30">
+                    <div id="loading-bar" class="bg-gradient-to-r from-yellow-400 to-emerald-400 h-4 rounded-full w-0 transition-all duration-300 shadow-md"></div>
+                </div>
+                <p id="loading-text" class="text-xs text-blue-200 font-medium">Memuat aset media interaktif... 0%</p>
+
+                <!-- Enter App Button (Hidden initially) -->
+                <button id="btn-enter" onclick="showLoginScreen()" class="hidden mt-6 px-8 py-3.5 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition transform active:scale-95">
+                    Mulai Belajar Sekarang <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            
+            <div class="absolute bottom-4 text-center text-xs text-white/60">
+                Dikembangkan oleh Software Engineer Edukasi Matematika
+            </div>
+        </div>
+
+        <!-- 2. LOGIN SCREEN -->
+        <div id="login-screen" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+            <div class="glass-card w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl relative border border-white/40 animate-fade-in">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                        <i class="fa-solid fa-user-graduate text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Selamat Datang!</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Isi identitas diri untuk memulai petualangan matematika</p>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Lengkap Siswa</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="input-name" required placeholder="Contoh: Andi Pratama" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kelas / Rombel</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-school absolute left-4 top-3.5 text-slate-400"></i>
+                            <select id="input-class" required class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700 text-sm">
+                                <option value="" disabled selected>Pilih Kelas Anda</option>
+                                <option value="Kelas 8-A">SMA - Kelas 11 D</option>
+                                <option value="Kelas 8-B">SMK - Kelas 12 TKR A</option>
+                                <option value="Kelas 8-C">SMK - Kelas 12 TKR B</option>
+                                <option value="Kelas 8-D">SMK - Kelas 12 TkR C</option>
+								<option value="Kelas 8-D">SMK - Kelas 12 TkR D</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Status Notifikasi Validasi Spreadsheet -->
+                    <div id="login-status-msg" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-login-submit" class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                            <span>Masuk</span>
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                        </button>
+
+                        <!-- Tombol Tambah/Daftar Siswa Baru jika belum terdaftar -->
+                        <button type="button" id="btn-register-student" onclick="handleRegisterStudent()" class="hidden flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Daftarkan Siswa Baru</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. MAIN APP LAYOUT (HEADER + NAVIGATION + CONTENT) -->
+        <header id="main-header" class="hidden bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-800 leading-tight">EduCircle</h1>
+                        <p class="text-xs text-slate-500 hidden sm:block">Sudut Pusat & Keliling Lingkaran</p>
+                    </div>
+                </div>
+
+                <!-- User Badge & Reset Progress -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-user text-indigo-600 text-lg"></i>
+                        <div class="text-left">
+                            <div id="user-display-name" class="text-xs font-bold text-indigo-950 max-w-[100px] sm:max-w-[150px] truncate">Siswa</div>
+                            <div id="user-display-class" class="text-[10px] text-indigo-600 font-medium">Kelas 8</div>
+                        </div>
+                    </div>
+                    <button onclick="confirmReset()" title="Reset Kemajuan" class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD CONTENT CONTAINER -->
+        <main id="main-content" class="hidden flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 my-2">
+            
+            <!-- VIEW 1: DASHBOARD UTAMA (PANDUAN & KARTU PILIHAN MODUL) -->
+            <div id="dashboard-view" class="space-y-6">
+                <!-- Welcome Banner & Dashboard Instruction Overview -->
+                <div id="welcome-dashboard-card" class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-indigo-500/30 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl"></div>
+                    <div class="relative z-10 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-yellow-400 text-slate-900 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">Panduan Media</span>
+                            <span class="text-xs text-indigo-200"><i class="fa-solid fa-circle-info mr-1"></i> Bacalah petunjuk pembelajaran sebelum memilih modul</span>
+                        </div>
+
+                        <h2 class="text-2xl sm:text-3xl font-black">Petunjuk & Aturan Pembelajaran Interaktif</h2>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm pt-2">
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-2">
+                                <div class="text-yellow-300 font-bold flex items-center gap-2 text-sm">
+                                    <span class="w-6 h-6 rounded-lg bg-yellow-400 text-slate-900 flex items-center justify-center font-black text-xs">1</span>
+                                    <span>Alur Unlocking Sequential</span>
+                                </div>
+                                <p class="text-indigo-100 leading-relaxed text-xs">
+                                    Modul dibuka secara berurutan. Anda wajib menyelesaikan **Kuis Modul 1** untuk membuka **Modul 2**, dan lulus **Kuis Modul 2** untuk mengakses **Evaluasi Akhir**.
+                                </p>
+                            </div>
+
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-2">
+                                <div class="text-emerald-300 font-bold flex items-center gap-2 text-sm">
+                                    <span class="w-6 h-6 rounded-lg bg-emerald-400 text-slate-900 flex items-center justify-center font-black text-xs">2</span>
+                                    <span>Simulasi Interaktif</span>
+                                </div>
+                                <p class="text-indigo-100 leading-relaxed text-xs">
+                                    Gunakan canvas interaktif pada Modul 1 (tarik titik) dan Modul 2 (slider sudut & busur) untuk memahami konsep secara visual sebelum mengerjakan kuis.
+                                </p>
+                            </div>
+
+                            <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-2">
+                                <div class="text-sky-300 font-bold flex items-center gap-2 text-sm">
+                                    <span class="w-6 h-6 rounded-lg bg-sky-400 text-slate-900 flex items-center justify-center font-black text-xs">3</span>
+                                    <span>Penilaian Keseluruhan</span>
+                                </div>
+                                <p class="text-indigo-100 leading-relaxed text-xs">
+                                    Nilai Akhir (0-100) dirata-ratakan dari ketiga kuis modul. Sertifikat digital Laporan Hasil Belajar dapat dicetak di akhir pembelajaran.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Header -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/50 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Daftar Modul Pembelajaran</h3>
+                            <p class="text-xs text-slate-500">Pilih modul yang telah terbuka untuk masuk ke halaman materi & kuis</p>
+                        </div>
+                        <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 self-start sm:self-auto">
+                            Progress Total: <span id="overall-progress-text">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <!-- CARDS MODULE SELECTION -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Modul 1 Card -->
+                    <div id="dashboard-card-1" class="bg-white rounded-3xl p-6 shadow-xl border-2 border-indigo-500 flex flex-col justify-between relative overflow-hidden transition transform hover:-translate-y-1">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg">1</div>
+                                <span id="status-badge-1" class="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold">Terbuka 🔓</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Modul 1</span>
+                                <h4 class="text-xl font-bold text-slate-800">Pengenalan Sudut</h4>
+                                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                    Pengenalan konsep dasar Sudut Pusat dan Sudut Keliling melalui simulasi tarik titik interaktif pada lingkaran.
+                                </p>
+                            </div>
+                        </div>
+                        <button id="btn-open-mod-1" onclick="openModule(1)" class="mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            <span>Masuk ke Modul 1</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modul 2 Card -->
+                    <div id="dashboard-card-2" class="bg-white/80 rounded-3xl p-6 shadow-md border-2 border-slate-200 flex flex-col justify-between relative overflow-hidden transition">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div id="icon-menu-2" class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-600 flex items-center justify-center text-xl font-bold shadow"><i class="fa-solid fa-lock"></i></div>
+                                <span id="status-badge-2" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-600 font-bold">Terkunci 🔒</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Modul 2</span>
+                                <h4 class="text-xl font-bold text-slate-700">Hubungan Sudut</h4>
+                                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                    Eksplorasi sifat utama hubungan Sudut Pusat = 2 &times; Sudut Keliling yang menghadap busur yang sama.
+                                </p>
+                            </div>
+                        </div>
+                        <button id="btn-open-mod-2" onclick="openModule(2)" disabled class="mt-6 w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition flex items-center justify-center gap-2">
+                            <span>Terkunci</span>
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modul 3 Card -->
+                    <div id="dashboard-card-3" class="bg-white/80 rounded-3xl p-6 shadow-md border-2 border-slate-200 flex flex-col justify-between relative overflow-hidden transition">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div id="icon-menu-3" class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-600 flex items-center justify-center text-xl font-bold shadow"><i class="fa-solid fa-lock"></i></div>
+                                <span id="status-badge-3" class="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-600 font-bold">Terkunci 🔒</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Modul 3</span>
+                                <h4 class="text-xl font-bold text-slate-700">Evaluasi Akhir</h4>
+                                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                    Kuis integrasi 10 soal variatif (PG, PG Kompleks, B/S, & Isian) untuk mengukur total pemahaman.
+                                </p>
+                            </div>
+                        </div>
+                        <button id="btn-open-mod-3" onclick="openModule(3)" disabled class="mt-6 w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition flex items-center justify-center gap-2">
+                            <span>Terkunci</span>
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: INDIVIDUAL MODULE VIEWS (DITAMPILKAN SAAT MODUL DIBUKA) -->
+            
+            <!-- BACK TO DASHBOARD NAVIGATION BAR -->
+            <div id="mod-nav-bar" class="hidden mb-6 flex items-center justify-between bg-white p-4 rounded-2xl shadow-md border border-slate-200">
+                <button onclick="showDashboardView()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard Utama
+                </button>
+                <div id="mod-page-title" class="text-sm font-extrabold text-indigo-900">Modul 1: Pengenalan Sudut</div>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- MENU 1: PENGENALAN SUDUT PUSAT & KELILING -->
+            <!-- ===================================== -->
+            <div id="menu-section-1" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                    <div class="flex border-b border-slate-200 mb-6">
+                        <button id="m1-tab-learn" onclick="switchSubTab(1, 'learn')" class="pb-3 px-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+                            <i class="fa-solid fa-book-open"></i> Materi & Simulasi Interaktif
+                        </button>
+                        <button id="m1-tab-quiz" onclick="switchSubTab(1, 'quiz')" class="pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i> Uji Coba Modul 1 (5 Soal)
+                        </button>
+                    </div>
+
+                    <!-- M1 MATERIAL CONTENT -->
+                    <div id="m1-content-learn" class="space-y-6">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg space-y-3">
+                            <h3 class="text-xl font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-shapes"></i> Definisi Sudut Pusat & Sudut Keliling
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm pt-2">
+                                <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+                                    <span class="font-bold text-yellow-300 text-base block mb-1">1. Sudut Pusat Lingkaran</span>
+                                    <p class="text-xs text-blue-100 leading-relaxed">
+                                        Sudut yang titik puncaknya terletak tepat di **titik pusat lingkaran (O)** dan kedua kaki sudutnya merupakan jari-jari lingkaran.
+                                    </p>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+                                    <span class="font-bold text-emerald-300 text-base block mb-1">2. Sudut Keliling Lingkaran</span>
+                                    <p class="text-xs text-blue-100 leading-relaxed">
+                                        Sudut yang titik puncaknya terletak pada **garis keliling lingkaran** dan kedua kaki sudutnya merupakan tali busur lingkaran.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Interactive Module 1 -->
+                        <div class="bg-slate-900 rounded-2xl p-4 sm:p-6 text-white grid grid-cols-1 lg:grid-cols-12 gap-6 items-center shadow-inner">
+                            <div class="lg:col-span-7 flex flex-col items-center justify-center relative">
+                                <div class="absolute top-2 left-2 bg-slate-800/80 text-sky-300 text-[11px] px-3 py-1 rounded-full border border-sky-500/30">
+                                    <i class="fa-solid fa-hand-pointer mr-1"></i> Klik 3 titik di canvas untuk bentuk sudut
+                                </div>
+                                <canvas id="canvas-m1" width="360" height="360" class="max-w-full bg-slate-900 rounded-xl cursor-pointer"></canvas>
+                            </div>
+
+                            <div class="lg:col-span-5 space-y-4">
+                                <h4 class="text-base font-bold text-sky-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-bezier-curve"></i> Eksplorasi Pembentukan Sudut
+                                </h4>
+                                
+                                <div class="p-4 bg-slate-800/80 rounded-xl border border-slate-700 space-y-3 text-xs">
+                                    <p class="text-slate-300">Pilih 3 titik pada gambar untuk membuat sudut:</p>
+                                    <div class="flex flex-wrap gap-2" id="point-buttons-container">
+                                        <!-- Buttons generated dynamically -->
+                                    </div>
+                                    <button onclick="resetM1Selection()" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg text-xs transition">
+                                        <i class="fa-solid fa-rotate-left mr-1"></i> Reset Titik Terpilih
+                                    </button>
+                                </div>
+
+                                <!-- Dynamic Identification Status Box -->
+                                <div id="m1-detection-box" class="p-4 rounded-xl border transition-all duration-300 bg-slate-800 border-slate-700">
+                                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Hasil Identifikasi Jenis Sudut:</div>
+                                    <div id="m1-angle-type-title" class="text-lg font-black text-slate-200 mb-1">Belum Ada Sudut Terbentuk</div>
+                                    <p id="m1-angle-type-desc" class="text-xs text-slate-400">Silakan klik 3 titik pada lingkaran untuk melihat definisi sudutnya.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button onclick="switchSubTab(1, 'quiz')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                                Lanjut ke Uji Coba Modul 1 <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- M1 QUIZ CONTENT -->
+                    <div id="m1-content-quiz" class="hidden space-y-6">
+                        <div class="bg-blue-50 p-4 rounded-xl text-blue-900 text-sm flex justify-between items-center">
+                            <span><b>Kuis Modul 1:</b> 5 Soal Identifikasi Jenis Sudut</span>
+                            <span id="m1-step-indicator" class="text-xs font-bold bg-indigo-600 text-white px-3 py-1 rounded-full">Soal 1 dari 5</span>
+                        </div>
+
+                        <form id="form-quiz-1" onsubmit="submitQuiz(1, event)" class="space-y-6">
+                            <!-- Container Single Question Stepper -->
+                            <div id="quiz-1-questions" class="space-y-6"></div>
+
+                            <!-- Single Question Stepper Navigation Bar -->
+                            <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                                <button type="button" id="m1-btn-prev" onclick="navigateQuizStep(1, -1)" class="px-4 py-2 border border-slate-300 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 text-sm disabled:opacity-50">
+                                    &larr; Soal Sebelumnya
+                                </button>
+                                
+                                <button type="button" id="m1-btn-check" onclick="checkCurrentQuestion(1)" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl shadow transition flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-magnifying-glass font-bold"></i> Periksa & Pembahasan
+                                </button>
+
+                                <button type="button" id="m1-btn-next" onclick="navigateQuizStep(1, 1)" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center gap-2 text-sm">
+                                    <span>Soal Selanjutnya</span> &rarr;
+                                </button>
+                                
+                                <button type="submit" id="m1-btn-submit" class="hidden px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-paper-plane"></i> Kirim & Selesai Modul 1
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- MENU 2: HUBUNGAN SUDUT PUSAT & KELILING (BUSUR SAMA) -->
+            <!-- ===================================== -->
+            <div id="menu-section-2" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-xl border border-slate-100">
+                    <div class="flex border-b border-slate-200 mb-6">
+                        <button id="m2-tab-learn" onclick="switchSubTab(2, 'learn')" class="pb-3 px-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+                            <i class="fa-solid fa-book-open"></i> Materi Sifat Utama (Busur Sama)
+                        </button>
+                        <button id="m2-tab-quiz" onclick="switchSubTab(2, 'quiz')" class="pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i> Uji Coba Modul 2 (5 Soal)
+                        </button>
+                    </div>
+
+                    <!-- M2 MATERIAL CONTENT -->
+                    <div id="m2-content-learn" class="space-y-6">
+                        <!-- Highlight Sifat Utama Banner -->
+                        <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-lg border border-amber-300 relative overflow-hidden">
+                            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-yellow-300 text-slate-900 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow">Sifat Utama Lingkaran</span>
+                                <span class="text-xs text-yellow-100 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> Syarat Mutlak: Menghadap Busur yang Sama</span>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-black mb-3">Besar Sudut Pusat = 2 &times; Besar Sudut Keliling</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-900 font-semibold text-sm">
+                                <div class="bg-white/95 backdrop-blur-md p-3.5 rounded-xl border border-white/40 flex items-center justify-between">
+                                    <span>Rumus Sudut Pusat:</span>
+                                    <span class="text-base font-extrabold text-red-600 font-mono">\(\angle AOB = 2 \times \angle APB\)</span>
+                                </div>
+                                <div class="bg-white/95 backdrop-blur-md p-3.5 rounded-xl border border-white/40 flex items-center justify-between">
+                                    <span>Rumus Sudut Keliling:</span>
+                                    <span class="text-base font-extrabold text-emerald-600 font-mono">\(\angle APB = \frac{1}{2} \times \angle AOB\)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Canvas Module 2 -->
+                        <div class="bg-slate-900 rounded-2xl p-4 sm:p-6 text-white grid grid-cols-1 lg:grid-cols-12 gap-6 items-center shadow-inner">
+                            <div class="lg:col-span-7 flex flex-col items-center justify-center relative">
+                                <div class="absolute top-2 left-2 bg-slate-800/80 text-yellow-300 text-[11px] px-3 py-1 rounded-full border border-yellow-500/30">
+                                    <i class="fa-solid fa-eye mr-1"></i> Perhatikan Busur AB (Kuning Menyala)
+                                </div>
+                                <canvas id="canvas-m2" width="360" height="360" class="max-w-full bg-slate-900 rounded-xl cursor-pointer"></canvas>
+                            </div>
+
+                            <div class="lg:col-span-5 space-y-4">
+                                <h4 class="text-base font-bold text-yellow-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders"></i> Simulasi Interaktif Perbandingan 2 : 1
+                                </h4>
+                                
+                                <div class="space-y-3 bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                                    <div>
+                                        <label class="text-xs text-slate-300 font-medium flex justify-between mb-1">
+                                            <span>Atur Besar Sudut Pusat (&angle;AOB):</span>
+                                            <span id="m2-val-pusat-slider" class="text-red-400 font-bold">120°</span>
+                                        </label>
+                                        <input type="range" id="m2-slider-pusat" min="30" max="170" value="120" step="2" class="w-full accent-red-500 cursor-pointer">
+                                    </div>
+
+                                    <div>
+                                        <label class="text-xs text-slate-300 font-medium flex justify-between mb-1">
+                                            <span>Geser Posisi Titik Keliling (P):</span>
+                                            <span id="m2-val-pos-slider" class="text-emerald-400 font-bold">Posisi Atas</span>
+                                        </label>
+                                        <input type="range" id="m2-slider-pos" min="1" max="100" value="50" class="w-full accent-emerald-500 cursor-pointer">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 bg-indigo-950/90 backdrop-blur-md p-4 rounded-xl border border-indigo-500/40 text-sm">
+                                    <div class="flex justify-between items-center border-b border-indigo-800/60 pb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                            <span class="text-slate-200">Sudut Pusat (&angle;AOB):</span>
+                                        </div>
+                                        <span id="m2-val-pusat" class="font-extrabold text-red-400 text-lg">120°</span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center border-b border-indigo-800/60 py-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                                            <span class="text-slate-200">Sudut Keliling (&angle;APB):</span>
+                                        </div>
+                                        <span id="m2-val-keliling" class="font-extrabold text-emerald-400 text-lg">60°</span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center pt-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                                            <span class="text-slate-200">Busur yang Dihadap:</span>
+                                        </div>
+                                        <span class="font-bold text-yellow-400">Busur AB Sama</span>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-xs text-amber-200">
+                                    <i class="fa-solid fa-lightbulb text-yellow-400 mr-1"></i> <b>Catatan Penting:</b><br>
+                                    Meskipun titik \(P\) digeser ke posisi mana pun sepanjang keliling lingkaran (selama tetap berada di atas busur mayor AB), besar sudut \(\angle APB\) <b>selalu tetap sama</b> yaitu setengah dari \(\angle AOB\).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contoh Soal Konkret -->
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 space-y-3">
+                            <h4 class="font-bold text-indigo-900 text-sm uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-pencil text-indigo-600"></i> Contoh Soal & Pembahasan Konkret:
+                            </h4>
+                            <div class="bg-white p-4 rounded-xl border border-indigo-100 space-y-2 text-sm text-slate-700">
+                                <p><b>Soal:</b> Diketahui sebuah sudut pusat \(\angle AOB = 84^\circ\) yang menghadap ke busur \(AB\). Berapakah besar sudut keliling \(\angle APB\) yang juga menghadap busur \(AB\)?</p>
+                                <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                                    <p class="font-bold text-emerald-950">Pembahasan:</p>
+                                    <p>Karena sudut pusat dan sudut keliling menghadap busur yang sama (\(AB\)), maka berlaku sifat utama:</p>
+                                    <p class="font-semibold text-emerald-700">\(\angle APB = \frac{1}{2} \times \angle AOB\)</p>
+                                    <p>\(\angle APB = \frac{1}{2} \times 84^\circ = 42^\circ\)</p>
+                                    <p><b>Jadi, besar sudut keliling \(\angle APB\) adalah \(42^\circ\).</b></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button onclick="switchSubTab(2, 'quiz')" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                                Lanjut ke Uji Coba Modul 2 <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- M2 QUIZ CONTENT -->
+                    <div id="m2-content-quiz" class="hidden space-y-6">
+                        <div class="bg-purple-50 p-4 rounded-xl text-purple-900 text-sm flex justify-between items-center">
+                            <span><b>Kuis Modul 2:</b> 5 Soal Fokus Sifat Busur Sama</span>
+                            <span id="m2-step-indicator" class="text-xs font-bold bg-purple-600 text-white px-3 py-1 rounded-full">Soal 1 dari 5</span>
+                        </div>
+
+                        <form id="form-quiz-2" onsubmit="submitQuiz(2, event)" class="space-y-6">
+                            <!-- Container Single Question Stepper -->
+                            <div id="quiz-2-questions" class="space-y-6"></div>
+
+                            <!-- Single Question Stepper Navigation Bar -->
+                            <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                                <button type="button" id="m2-btn-prev" onclick="navigateQuizStep(2, -1)" class="px-4 py-2 border border-slate-300 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 text-sm disabled:opacity-50">
+                                    &larr; Soal Sebelumnya
+                                </button>
+                                
+                                <button type="button" id="m2-btn-check" onclick="checkCurrentQuestion(2)" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl shadow transition flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-magnifying-glass font-bold"></i> Periksa & Pembahasan
+                                </button>
+
+                                <button type="button" id="m2-btn-next" onclick="navigateQuizStep(2, 1)" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center gap-2 text-sm">
+                                    <span>Soal Selanjutnya</span> &rarr;
+                                </button>
+                                
+                                <button type="submit" id="m2-btn-submit" class="hidden px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-paper-plane"></i> Kirim & Selesai Modul 2
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- MENU 3: LATIHAN SOAL EVALUASI AKHIR -->
+            <!-- ===================================== -->
+            <div id="menu-section-3" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-xl border border-slate-100">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-6 border-b border-slate-200 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-graduation-cap text-indigo-600"></i> Evaluasi Akhir Pemahaman
+                            </h3>
+                            <p class="text-xs text-slate-500">10 Soal Variatif (PG, PG Kompleks, Benar/Salah, & Isian)</p>
+                        </div>
+                        
+                        <!-- Quiz Timer Badge -->
+                        <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center gap-2 text-amber-800 font-bold text-sm">
+                            <i class="fa-solid fa-stopwatch text-amber-600 text-lg animate-pulse"></i>
+                            <span id="quiz-timer">15:00</span>
+                        </div>
+                    </div>
+
+                    <form id="form-quiz-3" onsubmit="submitQuiz(3, event)" class="space-y-8">
+                        <div id="quiz-3-questions" class="space-y-8"></div>
+
+                        <div class="flex justify-end pt-6 border-t border-slate-200">
+                            <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-2xl shadow-xl transition transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 text-base">
+                                <i class="fa-solid fa-circle-check text-xl"></i>
+                                <span>Selesaikan & Lihat Laporan Sertifikat</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- REPORT CARD & SERTIFIKAT (RESULT VIEW) -->
+            <!-- ===================================== -->
+            <div id="result-screen" class="hidden space-y-6 max-w-4xl mx-auto">
+                <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 text-center relative overflow-hidden">
+                    
+                    <!-- Decorative background shapes -->
+                    <div class="absolute -top-12 -right-12 w-40 h-40 bg-indigo-100 rounded-full blur-2xl opacity-60"></div>
+                    <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-100 rounded-full blur-2xl opacity-60"></div>
+
+                    <!-- Header Trophy Icon -->
+                    <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-amber-200 transform -rotate-6">
+                        <i class="fa-solid fa-trophy text-4xl"></i>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1">Laporan Hasil Belajar</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-6">Selamat! Anda telah menyelesaikan seluruh rangkaian modul EduCircle</p>
+
+                    <!-- Student Profile Banner -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-w-md mx-auto mb-8 flex items-center justify-around">
+                        <div class="text-left">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Nama Siswa</span>
+                            <span id="report-name" class="font-bold text-slate-800 text-base"></span>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-left">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Kelas</span>
+                            <span id="report-class" class="font-bold text-indigo-600 text-base"></span>
+                        </div>
+                    </div>
+
+                    <!-- Score Breakdown Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-blue-50/70 border border-blue-100 p-4 rounded-2xl">
+                            <span class="text-xs font-semibold text-blue-600 block mb-1">Nilai Modul 1</span>
+                            <span id="score-m1-display" class="text-3xl font-extrabold text-blue-900">0</span>
+                            <span class="text-xs text-blue-400 block mt-1">Pengenalan Sudut</span>
+                        </div>
+                        <div class="bg-purple-50/70 border border-purple-100 p-4 rounded-2xl">
+                            <span class="text-xs font-semibold text-purple-600 block mb-1">Nilai Modul 2</span>
+                            <span id="score-m2-display" class="text-3xl font-extrabold text-purple-900">0</span>
+                            <span class="text-xs text-purple-400 block mt-1">Hubungan Sudut</span>
+                        </div>
+                        <div class="bg-emerald-50/70 border border-emerald-100 p-4 rounded-2xl">
+                            <span class="text-xs font-semibold text-emerald-600 block mb-1">Nilai Modul 3</span>
+                            <span id="score-m3-display" class="text-3xl font-extrabold text-emerald-900">0</span>
+                            <span class="text-xs text-emerald-400 block mt-1">Evaluasi Akhir</span>
+                        </div>
+                    </div>
+
+                    <!-- Final Score Badge -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 mb-8 shadow-xl max-w-lg mx-auto">
+                        <div class="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1">Nilai Akhir Keseluruhan</div>
+                        <div id="final-score-display" class="text-5xl font-black text-yellow-300 mb-2">0</div>
+                        <div id="predikat-display" class="text-lg font-bold bg-white/20 px-4 py-1 rounded-full inline-block">Sangat Baik</div>
+                        <p id="feedback-display" class="text-xs text-indigo-100 mt-3 italic px-4"></p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center justify-center gap-4">
+                        <button onclick="window.print()" class="px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> Cetak / Simpan Sertifikat
+                        </button>
+                        <button onclick="confirmReset()" class="px-6 py-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Ulangi Pembelajaran
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer id="main-footer" class="hidden bg-white/80 backdrop-blur-md border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+            <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <span>&copy; 2026 EduCircle Matematika. All rights reserved.</span>
+                <span class="text-slate-400">Didesain dengan Tailwind CSS & HTML5 Canvas</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        /* ===================================================
+           GLOBAL APP STATE & SPREADSHEET CONFIGURATION
+           =================================================== */
+        // URL Google Apps Script Web App yang terhubung ke Google Spreadsheet Anda
+        // Silakan ganti URL di bawah setelah memasang Apps Script di Google Sheets Anda
+        const SPREADSHEET_WEB_APP_URL = "";
+
+        const state = {
+            user: { name: '', class: '' },
+            unlockedMenu: 1,
+            activeMenu: 1,
+            completed: { m1: false, m2: false, m3: false },
+            scores: { m1: 0, m2: 0, m3: 0 },
+            timerSeconds: 900,
+            timerInterval: null,
+            currentStep: { m1: 0, m2: 0 } // Active step index for 1 question per page
+        };
+
+        // Standardized SVG Diagrams for Module 1 Questions
+        const svgDiagrams = {
+            m1_q1: `
+                <svg viewBox="0 0 200 160" class="w-full max-w-[200px] mx-auto">
+                    <circle cx="100" cy="80" r="60" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M 50 115 L 100 80 L 150 115" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <path d="M 100 80 A 20 20 0 0 0 85 94" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                    <circle cx="100" cy="80" r="4" fill="#ef4444"/>
+                    <circle cx="50" cy="115" r="4" fill="#38bdf8"/>
+                    <circle cx="150" cy="115" r="4" fill="#38bdf8"/>
+                    <text x="100" y="70" text-anchor="middle" font-weight="bold" font-size="12" fill="#ef4444">O (Pusat)</text>
+                    <text x="40" y="125" font-weight="bold" font-size="12" fill="#0284c7">A</text>
+                    <text x="155" y="125" font-weight="bold" font-size="12" fill="#0284c7">B</text>
+                </svg>
+            `,
+            m1_q2: `
+                <svg viewBox="0 0 200 160" class="w-full max-w-[200px] mx-auto">
+                    <circle cx="100" cy="80" r="60" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M 55 118 L 100 20 L 145 118" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <circle cx="100" cy="80" r="3" fill="#64748b"/>
+                    <circle cx="100" cy="20" r="4" fill="#10b981"/>
+                    <circle cx="55" cy="118" r="4" fill="#38bdf8"/>
+                    <circle cx="145" cy="118" r="4" fill="#38bdf8"/>
+                    <text x="100" y="95" text-anchor="middle" font-size="10" fill="#64748b">O</text>
+                    <text x="100" y="14" text-anchor="middle" font-weight="bold" font-size="12" fill="#10b981">P (Keliling)</text>
+                    <text x="45" y="128" font-weight="bold" font-size="12" fill="#0284c7">A</text>
+                    <text x="150" y="128" font-weight="bold" font-size="12" fill="#0284c7">B</text>
+                </svg>
+            `,
+            m1_q3: `
+                <svg viewBox="0 0 200 160" class="w-full max-w-[200px] mx-auto">
+                    <circle cx="100" cy="80" r="60" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M 40 80 L 160 80 L 100 140 Z" fill="none" stroke="#8b5cf6" stroke-width="3"/>
+                    <circle cx="100" cy="80" r="3" fill="#64748b"/>
+                    <circle cx="40" cy="80" r="4" fill="#38bdf8"/>
+                    <circle cx="160" cy="80" r="4" fill="#38bdf8"/>
+                    <circle cx="100" cy="140" r="4" fill="#8b5cf6"/>
+                    <text x="100" y="72" text-anchor="middle" font-size="10" fill="#64748b">O</text>
+                    <text x="28" y="84" font-weight="bold" font-size="12" fill="#0284c7">A</text>
+                    <text x="168" y="84" font-weight="bold" font-size="12" fill="#0284c7">B</text>
+                    <text x="100" y="154" text-anchor="middle" font-weight="bold" font-size="12" fill="#8b5cf6">X (Keliling)</text>
+                </svg>
+            `,
+            m1_q4: `
+                <svg viewBox="0 0 200 160" class="w-full max-w-[200px] mx-auto">
+                    <circle cx="100" cy="80" r="60" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M 50 115 L 100 80 L 150 115" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <circle cx="100" cy="80" r="4" fill="#ef4444"/>
+                    <circle cx="50" cy="115" r="4" fill="#38bdf8"/>
+                    <circle cx="150" cy="115" r="4" fill="#38bdf8"/>
+                    <text x="100" y="70" text-anchor="middle" font-weight="bold" font-size="12" fill="#ef4444">O</text>
+                    <text x="40" y="125" font-weight="bold" font-size="12" fill="#0284c7">A</text>
+                    <text x="155" y="125" font-weight="bold" font-size="12" fill="#0284c7">B</text>
+                </svg>
+            `,
+            m1_q5: `
+                <svg viewBox="0 0 200 160" class="w-full max-w-[200px] mx-auto">
+                    <circle cx="100" cy="80" r="60" fill="none" stroke="#475569" stroke-width="2"/>
+                    <path d="M 55 118 L 140 30 L 155 105" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <circle cx="100" cy="80" r="3" fill="#64748b"/>
+                    <circle cx="140" cy="30" r="4" fill="#10b981"/>
+                    <circle cx="55" cy="118" r="4" fill="#38bdf8"/>
+                    <circle cx="155" cy="105" r="4" fill="#38bdf8"/>
+                    <text x="100" y="95" text-anchor="middle" font-size="10" fill="#64748b">O</text>
+                    <text x="145" y="24" text-anchor="middle" font-weight="bold" font-size="12" fill="#10b981">K</text>
+                    <text x="45" y="128" font-weight="bold" font-size="12" fill="#0284c7">A</text>
+                    <text x="165" y="112" font-weight="bold" font-size="12" fill="#0284c7">B</text>
+                </svg>
+            `
+        };
+
+        // Detailed Discussion Data for Modules 1 & 2
+        const discussionsM1 = [
+            "<b>Soal 1:</b> Puncak sudut ∠AOB berada di titik pusat lingkaran (O) dan kedua kakinya (OA & OB) adalah jari-jari. Oleh karena itu, sudut ini dinamakan <b>Sudut Pusat</b>.",
+            "<b>Soal 2:</b> Puncak sudut ∠APB terletak pada lingkaran di titik P dan kaki-kakinya merupakan tali busur. Maka, sudut ini adalah <b>Sudut Keliling</b>.",
+            "<b>Soal 3:</b> Titik X berada di garis lingkaran dan terbentuk dari dua garis tali busur (XA dan XB). Sesuai definisi, ini merupakan <b>Sudut Keliling Lingkaran</b>.",
+            "<b>Soal 4:</b> (1) <b>Benar</b> - Puncak di pusat O. (2) <b>Salah</b> - ∠AOB bukan sudut keliling. (3) <b>Benar</b> - Kaki OA dan OB menghubungkan pusat ke garis lingkaran (jari-jari).",
+            "<b>Soal 5:</b> (1) <b>Benar</b> - Puncak K berada di keliling. (2) <b>Salah</b> - ∠AKB bukan sudut pusat. (3) <b>Benar</b> - Garis AK dan BK adalah tali busur."
+        ];
+
+        const discussionsM2 = [
+            "<b>Soal 1:</b> Sudut Keliling = ½ × Sudut Pusat. <br>∠APB = ½ × 110° = <b>55°</b>.",
+            "<b>Soal 2:</b> Sudut Pusat = 2 × Sudut Keliling. <br>∠AOB = 2 × 38° = <b>76°</b>.",
+            "<b>Soal 3:</b> Sudut keliling ∠APB = ∠AQB = ½ × 80° = 40°. <br>Maka (∠APB + ∠AQB) = 40° + 40° = <b>80°</b>.",
+            "<b>Soal 4:</b> Pernyataan 1, 2, dan 3 BENAR. Pernyataan 4 SALAH karena sudut keliling bernilai setengah (1/2) dari sudut pusat, bukan 2 kali lipatnya.",
+            "<b>Soal 5:</b> Pernyataan 1, 2, dan 3 BENAR. Karena menghadap busur yang sama, besar ∠ACB = ∠ADB dan ∠AOB = 2 × ∠ACB. Pernyataan 4 SALAH."
+        ];
+
+        // Questions Data for Module 1 (Updated Table Benar/Salah Format)
+        const questionsM1 = [
+            {
+                id: 'm1_q1',
+                type: 'pg',
+                question: 'Perhatikan gambar diagram lingkaran di bawah ini! Sudut ∠AOB yang terbentuk memiliki titik puncak tepat di pusat O. Disebut apakah sudut ∠AOB tersebut?',
+                options: ['Sudut Keliling', 'Sudut Pusat', 'Sudut Tali Busur', 'Sudut Luar Lingkaran'],
+                correct: 1
+            },
+            {
+                id: 'm1_q2',
+                type: 'pg',
+                question: 'Berdasarkan gambar lingkaran berikut, puncak dari sudut ∠APB berada di titik P yang terletak di garis keliling lingkaran. Manakah identifikasi jenis sudut yang paling tepat?',
+                options: ['Sudut Pusat', 'Sudut Siku-siku', 'Sudut Keliling', 'Sudut Lurus'],
+                correct: 2
+            },
+            {
+                id: 'm1_q3',
+                type: 'pg',
+                question: 'Perhatikan titik X pada gambar di bawah. Dua kaki sudut dihubungkan oleh garis tali busur yang bertemu di titik X pada keliling lingkaran. Jenis sudut tersebut adalah...',
+                options: ['Sudut Pusat Lingkaran', 'Sudut Keliling Lingkaran', 'Sudut Pusat Siku-siku', 'Sudut Pusat Tumpul'],
+                correct: 1
+            },
+            {
+                id: 'm1_q4',
+                type: 'bs_table',
+                question: 'Perhatikan gambar diagram lingkaran berikut. Berilah tanda centang pada kolom Benar atau Salah untuk setiap pernyataan analisis sudut ∠AOB di bawah ini!',
+                rows: [
+                    { statement: 'Sudut ∠AOB dikategorikan sebagai Sudut Pusat karena titik puncaknya berada di pusat O.', correct: 'benar' },
+                    { statement: 'Sudut ∠AOB merupakan Sudut Keliling karena memiliki dua kaki sudut yang membentang.', correct: 'salah' },
+                    { statement: 'Kedua kaki sudut OA dan OB pada sudut ∠AOB merupakan jari-jari lingkaran.', correct: 'benar' }
+                ]
+            },
+            {
+                id: 'm1_q5',
+                type: 'bs_table',
+                question: 'Perhatikan gambar diagram lingkaran berikut. Tentukan kebenaran dari setiap pernyataan mengenai karakteristik sudut ∠AKB!',
+                rows: [
+                    { statement: 'Titik puncak K berada di garis keliling lingkaran sehingga ∠AKB dinamakan Sudut Keliling.', correct: 'benar' },
+                    { statement: 'Sudut ∠AKB adalah Sudut Pusat karena menghadap busur AB.', correct: 'salah' },
+                    { statement: 'Kaki sudut AK dan BK pada sudut ∠AKB merupakan garis tali busur lingkaran.', correct: 'benar' }
+                ]
+            }
+        ];
+
+        // Questions Data for Module 2
+        const questionsM2 = [
+            {
+                id: 'm2_q1',
+                type: 'pg',
+                question: 'Diketahui sudut pusat ∠AOB = 110° menghadap busur AB. Berapakah besar sudut keliling ∠APB yang juga menghadap busur AB?',
+                options: ['220°', '110°', '55°', '45°'],
+                correct: 2
+            },
+            {
+                id: 'm2_q2',
+                type: 'pg',
+                question: 'Jika besar sudut keliling ∠ACB yang menghadap busur AB adalah 38°, maka besar sudut pusat ∠AOB yang menghadap busur AB adalah...',
+                options: ['19°', '38°', '76°', '152°'],
+                correct: 2
+            },
+            {
+                id: 'm2_q3',
+                type: 'pg',
+                question: 'Suatu sudut pusat ∠AOB dan dua buah sudut keliling ∠APB serta ∠AQB sama-sama menghadap busur AB. Jika ∠AOB = 80°, maka nilai (∠APB + ∠AQB) adalah...',
+                options: ['40°', '80°', '120°', '160°'],
+                correct: 1
+            },
+            {
+                id: 'm2_q4',
+                type: 'pgk',
+                question: 'Pilihlah SEMUA pernyataan yang BENAR mengenai hubungan sudut yang menghadap busur yang SAMA:',
+                options: [
+                    'Besar sudut pusat adalah 2 kali dari besar sudut keliling',
+                    'Besar sudut keliling adalah setengah (1/2) dari besar sudut pusat',
+                    'Jika sudut pusat bernilai 100°, sudut kelilingnya adalah 50°',
+                    'Sudut keliling akan selalu bernilai 2 kali lebih besar dari sudut pusat'
+                ],
+                correct: [0, 1, 2]
+            },
+            {
+                id: 'm2_q5',
+                type: 'pgk',
+                question: 'Diketahui dua sudut keliling ∠ACB dan ∠ADB serta satu sudut pusat ∠AOB semuanya menghadap busur AB yang sama. Pernyataan mana saja yang BENAR?',
+                options: [
+                    'Besar ∠ACB sama dengan besar ∠ADB',
+                    'Besar ∠AOB sama dengan 2 × ∠ACB',
+                    'Besar ∠AOB sama dengan 2 × ∠ADB',
+                    'Besar ∠ACB ditambah ∠ADB nilainya pasti 180°'
+                ],
+                correct: [0, 1, 2]
+            }
+        ];
+
+        // Questions Data for Module 3 (10 questions: 4 PG, 2 PGK, 2 B/S, 2 Isian)
+        const questionsM3 = [
+            {
+                id: 'm3_q1',
+                type: 'pg',
+                question: 'Diketahui ∠AOB adalah sudut pusat bernilai 74°. Berapakah besar sudut keliling ∠ACB?',
+                options: ['37°', '148°', '74°', '90°'],
+                correct: 0
+            },
+            {
+                id: 'm3_q2',
+                type: 'pg',
+                question: 'Suatu sudut keliling besarnya 48°. Berapakah besar sudut pusat yang menghadap busur sama?',
+                options: ['24°', '96°', '48°', '132°'],
+                correct: 1
+            },
+            {
+                id: 'm3_q3',
+                type: 'pg',
+                question: 'Segitiga ABC berada di dalam lingkaran dengan AB sebagai diameter. Besar ∠ACB pasti sebesar...',
+                options: ['45°', '60°', '90°', '120°'],
+                correct: 2
+            },
+            {
+                id: 'm3_q4',
+                type: 'pg',
+                question: 'Jika ∠AOB = 3x + 10° dan ∠ACB = x + 30° (menghadap busur yang sama), maka nilai x adalah...',
+                options: ['10', '20', '30', '50'],
+                correct: 3
+            },
+            {
+                id: 'm3_q5',
+                type: 'pgk',
+                question: 'Manakah dari sudut-sudut berikut yang merupakan sudut keliling siku-siku (90°)?',
+                options: [
+                    'Sudut keliling yang menghadap tali busur sembarang',
+                    'Sudut keliling yang menghadap garis diameter lingkaran',
+                    'Sudut keliling dengan sudut pusat 180°',
+                    'Sudut keliling dengan sudut pusat 90°'
+                ],
+                correct: [1, 2]
+            },
+            {
+                id: 'm3_q6',
+                type: 'pgk',
+                question: 'Sifat-sifat sudut pada lingkaran yang benar adalah:',
+                options: [
+                    'Sudut-sudut keliling yang menghadap busur yang sama adalah sama besar',
+                    'Sudut pusat berada di titik pusat O',
+                    'Jumlah sudut keliling yang saling berhadapan pada segi empat tali busur adalah 180°',
+                    'Sudut pusat selalu lebih kecil dari sudut keliling'
+                ],
+                correct: [0, 1, 2]
+            },
+            {
+                id: 'm3_q7',
+                type: 'bs',
+                question: 'Benar atau Salah: Jika sudut pusat besarnya 150°, maka sudut keliling yang menghadap busur yang sama adalah 75°.',
+                options: ['Benar', 'Salah'],
+                correct: 0
+            },
+            {
+                id: 'm3_q8',
+                type: 'bs',
+                question: 'Benar atau Salah: Sudut keliling yang menghadap busur yang lebih besar pasti memiliki ukuran sudut yang lebih kecil.',
+                options: ['Benar', 'Salah'],
+                correct: 1
+            },
+            {
+                id: 'm3_q9',
+                type: 'isian',
+                question: 'Jika sudut pusat lingkaran adalah 110 derajat, maka besar sudut kelilingnya adalah ... derajat (tulis angka saja).',
+                correct: '55'
+            },
+            {
+                id: 'm3_q10',
+                type: 'isian',
+                question: 'Besar sudut keliling yang menghadap busur setengah lingkaran adalah ... derajat (tulis angka saja).',
+                correct: '90'
+            }
+        ];
+
+        /* ===================================================
+           STEPPER & SINGLE QUESTION DISPLAY LOGIC
+           =================================================== */
+        function openModule(menuNum) {
+            if (menuNum > state.unlockedMenu) {
+                alert(`🔒 Modul ${menuNum} masih terkunci. Selesaikan kuis pada Modul ${menuNum - 1} terlebih dahulu!`);
+                return;
+            }
+
+            state.activeMenu = menuNum;
+
+            // Hide Dashboard View & Results
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            // Show Navigation Header Bar & Module Section
+            document.getElementById('mod-nav-bar').classList.remove('hidden');
+            
+            const titles = [
+                "Modul 1: Pengenalan Sudut Pusat & Keliling",
+                "Modul 2: Hubungan Sudut (Busur Sama)",
+                "Modul 3: Evaluasi Akhir Pemahaman"
+            ];
+            document.getElementById('mod-page-title').innerText = titles[menuNum - 1];
+
+            document.getElementById('menu-section-1').classList.add('hidden');
+            document.getElementById('menu-section-2').classList.add('hidden');
+            document.getElementById('menu-section-3').classList.add('hidden');
+
+            document.getElementById(`menu-section-${menuNum}`).classList.remove('hidden');
+
+            if (menuNum === 3 && !state.timerInterval) {
+                startQuizTimer();
+            }
+
+            // Immediately initialize and draw interactive canvas graphics
+            setTimeout(() => {
+                initCanvases();
+                if (menuNum === 1) drawCanvas1();
+                if (menuNum === 2) drawCanvas2();
+            }, 100);
+        }
+
+        function navigateQuizStep(modNum, direction) {
+            const questions = modNum === 1 ? questionsM1 : questionsM2;
+            let current = state.currentStep[`m${modNum}`] + direction;
+            
+            if (current < 0) current = 0;
+            if (current >= questions.length) current = questions.length - 1;
+
+            state.currentStep[`m${modNum}`] = current;
+            updateStepView(modNum);
+        }
+
+        function updateStepView(modNum) {
+            const questions = modNum === 1 ? questionsM1 : questionsM2;
+            const currentIdx = state.currentStep[`m${modNum}`];
+
+            questions.forEach((q, idx) => {
+                const card = document.getElementById(`q-card-${modNum}-${idx}`);
+                if (card) {
+                    if (idx === currentIdx) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Update Header Step Badge
+            const badge = document.getElementById(`m${modNum}-step-indicator`);
+            if (badge) badge.innerText = `Soal ${currentIdx + 1} dari ${questions.length}`;
+
+            // Update Navigation Buttons Visibility
+            const btnPrev = document.getElementById(`m${modNum}-btn-prev`);
+            const btnNext = document.getElementById(`m${modNum}-btn-next`);
+            const btnSubmit = document.getElementById(`m${modNum}-btn-submit`);
+
+            if (btnPrev) btnPrev.disabled = (currentIdx === 0);
+
+            if (currentIdx === questions.length - 1) {
+                if (btnNext) btnNext.classList.add('hidden');
+                if (btnSubmit) btnSubmit.classList.remove('hidden');
+            } else {
+                if (btnNext) btnNext.classList.remove('hidden');
+                if (btnSubmit) btnSubmit.classList.add('hidden');
+            }
+        }
+
+        function checkCurrentQuestion(modNum) {
+            const currentIdx = state.currentStep[`m${modNum}`];
+            const discEl = document.getElementById(`disc-${modNum}-${currentIdx}`);
+            if (discEl) {
+                discEl.classList.remove('hidden');
+                discEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        /* Render Questions as Single Stepper Items with Inline Discussion */
+        function renderModuleQuestions(modNum, questions, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            const isStepper = (modNum === 1 || modNum === 2);
+            const discussions = modNum === 1 ? discussionsM1 : discussionsM2;
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.id = `q-card-${modNum}-${idx}`;
+                card.className = `p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 shadow-sm ${isStepper && idx !== 0 ? 'hidden' : ''}`;
+
+                let headerTag = '';
+                if (q.type === 'pg') headerTag = '<span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full">Pilihan Ganda</span>';
+                else if (q.type === 'pgk') headerTag = '<span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full">Pilihan Ganda Kompleks</span>';
+                else if (q.type === 'bs') headerTag = '<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Benar / Salah</span>';
+                else if (q.type === 'bs_table') headerTag = '<span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">Tabel Benar / Salah</span>';
+                else if (q.type === 'isian') headerTag = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">Isian Singkat</span>';
+
+                let imageSVG = svgDiagrams[q.id] ? `<div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm my-2">${svgDiagrams[q.id]}</div>` : '';
+
+                let inputHTML = '';
+
+                if (q.type === 'pg') {
+                    inputHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">`;
+                    q.options.forEach((opt, oIdx) => {
+                        inputHTML += `
+                            <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 cursor-pointer transition text-sm">
+                                <input type="radio" name="${q.id}" value="${oIdx}" required class="accent-indigo-600 w-4 h-4 mr-3 shrink-0">
+                                <span class="text-slate-700 font-medium">${opt}</span>
+                            </label>
+                        `;
+                    });
+                    inputHTML += `</div>`;
+                } else if (q.type === 'bs_table') {
+                    inputHTML = `
+                        <div class="overflow-x-auto mt-3">
+                            <table class="w-full text-xs sm:text-sm text-left border-collapse bg-white rounded-xl overflow-hidden border border-slate-300">
+                                <thead class="bg-sky-100 text-slate-800 border-b border-slate-300">
+                                    <tr>
+                                        <th class="p-3 font-bold border-r border-slate-300 text-center">Pernyataan</th>
+                                        <th class="p-3 font-bold w-20 text-center border-r border-slate-300">Benar</th>
+                                        <th class="p-3 font-bold w-20 text-center">Salah</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-300">
+                    `;
+                    q.rows.forEach((r, rIdx) => {
+                        inputHTML += `
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 border-r border-slate-300 text-slate-700 font-medium leading-relaxed">${r.statement}</td>
+                                <td class="p-3 text-center border-r border-slate-300 bg-emerald-50/30">
+                                    <input type="radio" name="${q.id}_row_${rIdx}" value="benar" required class="accent-emerald-600 w-5 h-5 cursor-pointer">
+                                </td>
+                                <td class="p-3 text-center bg-rose-50/30">
+                                    <input type="radio" name="${q.id}_row_${rIdx}" value="salah" required class="accent-rose-600 w-5 h-5 cursor-pointer">
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    inputHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else if (q.type === 'bs') {
+                    inputHTML = `<div class="grid grid-cols-2 gap-3 mt-2">`;
+                    q.options.forEach((opt, oIdx) => {
+                        inputHTML += `
+                            <label class="flex items-center justify-center p-3 rounded-xl bg-white border border-slate-200 hover:border-amber-400 cursor-pointer transition text-sm font-bold">
+                                <input type="radio" name="${q.id}" value="${oIdx}" required class="accent-amber-600 w-4 h-4 mr-2">
+                                <span class="text-slate-700">${opt}</span>
+                            </label>
+                        `;
+                    });
+                    inputHTML += `</div>`;
+                } else if (q.type === 'pgk') {
+                    inputHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">`;
+                    q.options.forEach((opt, oIdx) => {
+                        inputHTML += `
+                            <label class="flex items-center p-3 rounded-xl bg-white border border-slate-200 hover:border-purple-400 cursor-pointer transition text-sm">
+                                <input type="checkbox" name="${q.id}" value="${oIdx}" class="accent-purple-600 w-4 h-4 rounded mr-3 shrink-0">
+                                <span class="text-slate-700 font-medium">${opt}</span>
+                            </label>
+                        `;
+                    });
+                    inputHTML += `</div>`;
+                } else if (q.type === 'isian') {
+                    inputHTML = `
+                        <div class="mt-2">
+                            <input type="text" name="${q.id}" required placeholder="Ketikkan jawaban angka di sini..." class="w-full max-w-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm font-semibold">
+                        </div>
+                    `;
+                }
+
+                // Per-Question Discussion Box
+                let discHTML = '';
+                if (isStepper && discussions && discussions[idx]) {
+                    discHTML = `
+                        <div id="disc-${modNum}-${idx}" class="hidden mt-4 p-4 rounded-xl bg-indigo-900 text-white text-xs sm:text-sm border border-indigo-400 space-y-2 animate-fade-in">
+                            <div class="font-bold text-yellow-300 flex items-center gap-2">
+                                <i class="fa-solid fa-graduation-cap"></i> Kunci & Pembahasan Soal #${idx + 1}:
+                            </div>
+                            <div class="text-indigo-100 leading-relaxed">${discussions[idx]}</div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400">Soal #${idx + 1}</span>
+                        ${headerTag}
+                    </div>
+                    ${imageSVG}
+                    <p class="font-bold text-slate-800 text-sm sm:text-base">${q.question}</p>
+                    ${inputHTML}
+                    ${discHTML}
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        /* ===================================================
+           QUIZ SUBMISSION & AUTOMATIC DASHBOARD RETURN
+           =================================================== */
+        function submitQuiz(modNum, event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            let questions = [];
+            if (modNum === 1) questions = questionsM1;
+            if (modNum === 2) questions = questionsM2;
+            if (modNum === 3) questions = questionsM3;
+
+            let correctCount = 0;
+
+            questions.forEach(q => {
+                if (q.type === 'pg' || q.type === 'bs') {
+                    const val = formData.get(q.id);
+                    if (val !== null && parseInt(val) === q.correct) {
+                        correctCount++;
+                    }
+                } else if (q.type === 'bs_table') {
+                    let tableAllCorrect = true;
+                    q.rows.forEach((r, rIdx) => {
+                        const val = formData.get(`${q.id}_row_${rIdx}`);
+                        if (val !== r.correct) {
+                            tableAllCorrect = false;
+                        }
+                    });
+                    if (tableAllCorrect) correctCount++;
+                } else if (q.type === 'pgk') {
+                    const vals = formData.getAll(q.id).map(v => parseInt(v)).sort();
+                    const correctSorted = [...q.correct].sort();
+                    if (JSON.stringify(vals) === JSON.stringify(correctSorted)) {
+                        correctCount++;
+                    }
+                } else if (q.type === 'isian') {
+                    const val = (formData.get(q.id) || '').toString().trim();
+                    if (val === q.correct) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            const score = Math.round((correctCount / questions.length) * 100);
+
+            if (modNum === 1) {
+                state.scores.m1 = score;
+                state.completed.m1 = true;
+                if (state.unlockedMenu < 2) state.unlockedMenu = 2;
+                saveStateToStorage();
+                updateUIState();
+
+                alert(`🎉 Kuis Modul 1 Selesai!\nNilai Anda: ${score}/100\n\nModul 2 kini telah TERBUKA! Anda akan diarahkan kembali ke Dashboard Utama.`);
+                showDashboardView();
+            } else if (modNum === 2) {
+                state.scores.m2 = score;
+                state.completed.m2 = true;
+                if (state.unlockedMenu < 3) state.unlockedMenu = 3;
+                saveStateToStorage();
+                updateUIState();
+
+                alert(`🎉 Kuis Modul 2 Selesai!\nNilai Anda: ${score}/100\n\nModul 3 (Evaluasi Akhir) kini telah TERBUKA! Anda akan diarahkan kembali ke Dashboard Utama.`);
+                showDashboardView();
+            } else if (modNum === 3) {
+                state.scores.m3 = score;
+                state.completed.m3 = true;
+                saveStateToStorage();
+                updateUIState();
+                if (state.timerInterval) clearInterval(state.timerInterval);
+                showResultScreen();
+            }
+        }
+
+        /* ===================================================
+           CANVAS INITIALIZATION FIX
+           =================================================== */
+        function initCanvases() {
+            canvas1 = document.getElementById('canvas-m1');
+            if (canvas1) {
+                ctx1 = canvas1.getContext('2d');
+                setupM1PointButtons();
+                
+                // Avoid duplicate event listener binding
+                canvas1.removeEventListener('click', handleM1CanvasClick);
+                canvas1.addEventListener('click', handleM1CanvasClick);
+                drawCanvas1();
+            }
+
+            canvas2 = document.getElementById('canvas-m2');
+            if (canvas2) {
+                ctx2 = canvas2.getContext('2d');
+                const sliderPusat2 = document.getElementById('m2-slider-pusat');
+                const sliderPos2 = document.getElementById('m2-slider-pos');
+
+                if (sliderPusat2) {
+                    sliderPusat2.removeEventListener('input', drawCanvas2);
+                    sliderPusat2.addEventListener('input', drawCanvas2);
+                }
+                if (sliderPos2) {
+                    sliderPos2.removeEventListener('input', drawCanvas2);
+                    sliderPos2.addEventListener('input', drawCanvas2);
+                }
+                drawCanvas2();
+            }
+        }
+
+        function switchSubTab(modNum, tabType) {
+            const learnContent = document.getElementById(`m${modNum}-content-learn`);
+            const quizContent = document.getElementById(`m${modNum}-content-quiz`);
+            const learnTab = document.getElementById(`m${modNum}-tab-learn`);
+            const quizTab = document.getElementById(`m${modNum}-tab-quiz`);
+
+            if (!learnContent || !quizContent || !learnTab || !quizTab) return;
+
+            if (tabType === 'learn') {
+                learnContent.classList.remove('hidden');
+                quizContent.classList.add('hidden');
+
+                learnTab.className = "pb-3 px-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 cursor-pointer";
+                quizTab.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center gap-2 cursor-pointer";
+
+                // Immediately initialize and redraw canvas when switching to learn tab
+                setTimeout(() => {
+                    initCanvases();
+                    if (modNum === 1) drawCanvas1();
+                    if (modNum === 2) drawCanvas2();
+                }, 50);
+            } else if (tabType === 'quiz') {
+                learnContent.classList.add('hidden');
+                quizContent.classList.remove('hidden');
+
+                quizTab.className = "pb-3 px-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 cursor-pointer";
+                learnTab.className = "pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center gap-2 cursor-pointer";
+
+                updateStepView(modNum);
+            }
+        }
+
+        // Render Discussion Content for Modules 1 and 2
+        function renderDiscussion(modNum, score) {
+            const discBox = document.getElementById(`m${modNum}-discussion-box`);
+            const discContent = document.getElementById(`m${modNum}-discussion-content`);
+            const scoreBadge = document.getElementById(`m${modNum}-quiz-score-badge`);
+
+            if (!discBox || !discContent) return;
+
+            scoreBadge.innerText = `Score Kuis: ${score}/100`;
+            discContent.innerHTML = '';
+
+            const list = modNum === 1 ? discussionsM1 : discussionsM2;
+            list.forEach((item, i) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-3 rounded-xl bg-white/10 border border-white/20 leading-relaxed";
+                itemDiv.innerHTML = item;
+                discContent.appendChild(itemDiv);
+            });
+
+            discBox.classList.remove('hidden');
+        }
+
+        /* ===================================================
+           SPLASH SCREEN & LOGIN LOGIC
+           =================================================== */
+        let registeredStudentsList = [];
+        let isSplashFinished = false;
+
+        /* ===================================================
+           STORAGE & UI STATE HELPERS
+           =================================================== */
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem('educircle_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.user = parsed.user || { name: '', class: '' };
+                    state.unlockedMenu = parsed.unlockedMenu || 1;
+                    state.completed = parsed.completed || { m1: false, m2: false, m3: false };
+                    state.scores = parsed.scores || { m1: 0, m2: 0, m3: 0 };
+                }
+            } catch (e) {
+                console.warn("Gagal memuat state dari localStorage:", e);
+            }
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem('educircle_state', JSON.stringify({
+                    user: state.user,
+                    unlockedMenu: state.unlockedMenu,
+                    completed: state.completed,
+                    scores: state.scores
+                }));
+            } catch (e) {
+                console.warn("Gagal menyimpan state ke localStorage:", e);
+            }
+        }
+
+        function updateUserHeader() {
+            const nameEl = document.getElementById('user-display-name');
+            const classEl = document.getElementById('user-display-class');
+            if (nameEl) nameEl.innerText = state.user.name || 'Siswa';
+            if (classEl) classEl.innerText = state.user.class || 'Kelas 8';
+        }
+
+        function updateUIState() {
+            updateUserHeader();
+
+            // Total Progress
+            let doneCount = 0;
+            if (state.completed.m1) doneCount++;
+            if (state.completed.m2) doneCount++;
+            if (state.completed.m3) doneCount++;
+            const pct = Math.round((doneCount / 3) * 100);
+
+            const pText = document.getElementById('overall-progress-text');
+            const pBar = document.getElementById('overall-progress-bar');
+            if (pText) pText.innerText = `${pct}%`;
+            if (pBar) pBar.style.width = `${pct}%`;
+
+            // Card 2
+            const card2 = document.getElementById('dashboard-card-2');
+            const icon2 = document.getElementById('icon-menu-2');
+            const badge2 = document.getElementById('status-badge-2');
+            const btn2 = document.getElementById('btn-open-mod-2');
+
+            if (state.unlockedMenu >= 2) {
+                if (card2) card2.className = "bg-white rounded-3xl p-6 shadow-xl border-2 border-indigo-500 flex flex-col justify-between relative overflow-hidden transition transform hover:-translate-y-1";
+                if (icon2) {
+                    icon2.className = "w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow";
+                    icon2.innerHTML = "2";
+                }
+                if (badge2) {
+                    badge2.className = "text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold";
+                    badge2.innerText = state.completed.m2 ? "Selesai ✅" : "Terbuka 🔓";
+                }
+                if (btn2) {
+                    btn2.disabled = false;
+                    btn2.className = "mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer";
+                    btn2.innerHTML = `<span>Masuk ke Modul 2</span> <i class="fa-solid fa-arrow-right"></i>`;
+                }
+            }
+
+            // Card 3
+            const card3 = document.getElementById('dashboard-card-3');
+            const icon3 = document.getElementById('icon-menu-3');
+            const badge3 = document.getElementById('status-badge-3');
+            const btn3 = document.getElementById('btn-open-mod-3');
+
+            if (state.unlockedMenu >= 3) {
+                if (card3) card3.className = "bg-white rounded-3xl p-6 shadow-xl border-2 border-indigo-500 flex flex-col justify-between relative overflow-hidden transition transform hover:-translate-y-1";
+                if (icon3) {
+                    icon3.className = "w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow";
+                    icon3.innerHTML = "3";
+                }
+                if (badge3) {
+                    badge3.className = "text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold";
+                    badge3.innerText = state.completed.m3 ? "Selesai ✅" : "Terbuka 🔓";
+                }
+                if (btn3) {
+                    btn3.disabled = false;
+                    btn3.className = "mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer";
+                    btn3.innerHTML = `<span>Masuk ke Modul 3</span> <i class="fa-solid fa-arrow-right"></i>`;
+                }
+            }
+        }
+
+        function renderQuestions() {
+            renderModuleQuestions(1, questionsM1, 'quiz-1-questions');
+            renderModuleQuestions(2, questionsM2, 'quiz-2-questions');
+            renderModuleQuestions(3, questionsM3, 'quiz-3-questions');
+        }
+
+        function showDashboardView() {
+            document.getElementById('menu-section-1').classList.add('hidden');
+            document.getElementById('menu-section-2').classList.add('hidden');
+            document.getElementById('menu-section-3').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('mod-nav-bar').classList.add('hidden');
+
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            updateUIState();
+        }
+
+        function confirmReset() {
+            if (confirm("Apakah Anda yakin ingin mengulang seluruh kemajuan pembelajaran?")) {
+                state.unlockedMenu = 1;
+                state.completed = { m1: false, m2: false, m3: false };
+                state.scores = { m1: 0, m2: 0, m3: 0 };
+                state.currentStep = { m1: 0, m2: 0 };
+                saveStateToStorage();
+                showDashboardView();
+            }
+        }
+
+        function startSplashLoading() {
+            if (isSplashFinished) return;
+            
+            const loadingBar = document.getElementById('loading-bar');
+            const loadingText = document.getElementById('loading-text');
+            const btnEnter = document.getElementById('btn-enter');
+            const loadingBox = document.getElementById('loading-box');
+
+            if (!loadingBar || !loadingText || !btnEnter || !loadingBox) {
+                showLoginScreen();
+                return;
+            }
+
+            let progress = 0;
+            
+            // Safety timeout: Jika terjadi jeda, langsung tampilkan tombol dalam 1.2 detik
+            const safetyTimer = setTimeout(() => {
+                if (!isSplashFinished) {
+                    finishSplash();
+                }
+            }, 1200);
+
+            const interval = setInterval(() => {
+                progress += 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    clearTimeout(safetyTimer);
+                    finishSplash();
+                } else {
+                    loadingBar.style.width = progress + '%';
+                    loadingText.innerText = `Memuat aset media interaktif... ${progress}%`;
+                }
+            }, 80);
+
+            function finishSplash() {
+                isSplashFinished = true;
+                if (loadingBar) loadingBar.style.width = '100%';
+                if (loadingText) loadingText.innerText = "Siap untuk belajar! Klik tombol di bawah.";
+                if (loadingBox) loadingBox.classList.add('hidden');
+                if (btnEnter) {
+                    btnEnter.classList.remove('hidden');
+                    btnEnter.classList.add('animate-bounce');
+                }
+            }
+        }
+
+        // Jalankan pemicu loading secepat mungkin ketika DOM siap
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedState();
+            startSplashLoading();
+        });
+
+        window.onload = function() {
+            loadSavedState();
+            startSplashLoading();
+        };
+
+        function showLoginScreen() {
+            const splash = document.getElementById('splash-screen');
+            const login = document.getElementById('login-screen');
+            if (splash) splash.classList.add('hidden');
+            if (login) login.classList.remove('hidden');
+            fetchStudentDataFromSheet();
+        }
+
+        async function fetchStudentDataFromSheet() {
+            const msgEl = document.getElementById('login-status-msg');
+            if (!SPREADSHEET_WEB_APP_URL || SPREADSHEET_WEB_APP_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
+                return;
+            }
+            try {
+                if (msgEl) {
+                    msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-blue-50 text-blue-800 border border-blue-200 block";
+                    msgEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Mengambil data siswa dari Spreadsheet...`;
+                    msgEl.classList.remove('hidden');
+                }
+
+                const res = await fetch(`${SPREADSHEET_WEB_APP_URL}?action=getStudents`);
+                const data = await res.json();
+                
+                if (data && data.students) {
+                    registeredStudentsList = data.students;
+                    if (msgEl) {
+                        msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+                        msgEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-emerald-600"></i> Terhubung ke Spreadsheet (${registeredStudentsList.length} siswa terdaftar).`;
+                    }
+                }
+            } catch (err) {
+                console.warn("Gagal terhubung ke Google Sheets:", err);
+                if (msgEl) {
+                    msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 text-amber-800 border border-amber-200 block";
+                    msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i> Tidak dapat memuat daftar siswa otomatis. Anda tetap dapat memasukkan Nama & Kelas.`;
+                }
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('input-name').value.trim();
+            const classInput = document.getElementById('input-class').value;
+            const msgEl = document.getElementById('login-status-msg');
+            const btnReg = document.getElementById('btn-register-student');
+
+            if (!nameInput || !classInput) return;
+
+            // Jika daftar siswa dari spreadsheet berhasil diambil
+            if (registeredStudentsList && registeredStudentsList.length > 0) {
+                const found = registeredStudentsList.find(s => {
+                    const sName = (s.name || s.Nama || s['Nama Siswa'] || '').toString().trim().toLowerCase();
+                    const sClass = (s.class || s.Kelas || s['Kelas'] || '').toString().trim();
+                    return sName === nameInput.toLowerCase() && (sClass === classInput || !sClass);
+                });
+
+                if (!found) {
+                    msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-amber-100 text-amber-900 border border-amber-300 block";
+                    msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Data <b>"${nameInput}"</b> belum terdaftar di kelas <b>${classInput}</b>. Silakan klik <b>Daftarkan Siswa Baru</b>.`;
+                    msgEl.classList.remove('hidden');
+                    btnReg.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Jika valid / terdaftar
+            if (msgEl) msgEl.classList.add('hidden');
+            if (btnReg) btnReg.classList.add('hidden');
+
+            state.user.name = nameInput;
+            state.user.class = classInput;
+
+            saveStateToStorage();
+            updateUserHeader();
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('main-footer').classList.remove('hidden');
+
+            renderQuestions();
+            updateUIState();
+        }
+
+        async function handleRegisterStudent() {
+            const nameInput = document.getElementById('input-name').value.trim();
+            const classInput = document.getElementById('input-class').value;
+            const msgEl = document.getElementById('login-status-msg');
+            const btnReg = document.getElementById('btn-register-student');
+
+            if (!nameInput || !classInput) return;
+
+            msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-blue-100 text-blue-900 border border-blue-300";
+            msgEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengirim data siswa ke tab DataSiswa...`;
+            msgEl.classList.remove('hidden');
+
+            try {
+                if (SPREADSHEET_WEB_APP_URL && !SPREADSHEET_WEB_APP_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
+                    await fetch(SPREADSHEET_WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'addStudent',
+                            name: nameInput,
+                            class: classInput
+                        })
+                    });
+                }
+
+                registeredStudentsList.push({ name: nameInput, class: classInput });
+
+                msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300";
+                msgEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Berhasil! Siswa <b>"${nameInput}"</b> telah terdaftar. Silakan klik <b>Masuk</b>.`;
+                btnReg.classList.add('hidden');
+            } catch (err) {
+                msgEl.className = "text-xs p-3 rounded-xl font-semibold bg-rose-100 text-rose-900 border border-rose-300";
+                msgEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Gagal menyimpan data ke Spreadsheet.`;
+            }
+        }
+
+        async function sendResultsToSpreadsheet(modNum, score) {
+            if (!SPREADSHEET_WEB_APP_URL || SPREADSHEET_WEB_APP_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) return;
+
+            const finalScore = Math.round((state.scores.m1 + state.scores.m2 + state.scores.m3) / 3);
+
+            try {
+                await fetch(SPREADSHEET_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveResults',
+                        timestamp: new Date().toLocaleString('id-ID'),
+                        name: state.user.name,
+                        class: state.user.class,
+                        scoreM1: state.scores.m1,
+                        scoreM2: state.scores.m2,
+                        scoreM3: state.scores.m3,
+                        finalScore: finalScore
+                    })
+                });
+            } catch(e) {
+                console.warn("Gagal mengirim hasil kuis ke Google Sheets:", e);
+            }
+        }
+
+        function startQuizTimer() {
+            const timerDisplay = document.getElementById('quiz-timer');
+            state.timerInterval = setInterval(() => {
+                state.timerSeconds--;
+                if (state.timerSeconds <= 0) {
+                    clearInterval(state.timerInterval);
+                    alert("⏰ Waktu evaluasi telah habis! Jawaban Anda akan otomatis dikirim.");
+                    document.getElementById('form-quiz-3').requestSubmit();
+                    return;
+                }
+                const mins = Math.floor(state.timerSeconds / 60);
+                const secs = state.timerSeconds % 60;
+                timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        /* ===================================================
+           RESULT & REPORT CARD GENERATION
+           =================================================== */
+        function showResultScreen() {
+            document.getElementById('menu-section-1').classList.add('hidden');
+            document.getElementById('menu-section-2').classList.add('hidden');
+            document.getElementById('menu-section-3').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('report-name').innerText = state.user.name;
+            document.getElementById('report-class').innerText = state.user.class;
+
+            document.getElementById('score-m1-display').innerText = state.scores.m1;
+            document.getElementById('score-m2-display').innerText = state.scores.m2;
+            document.getElementById('score-m3-display').innerText = state.scores.m3;
+
+            const finalScore = Math.round((state.scores.m1 + state.scores.m2 + state.scores.m3) / 3);
+            document.getElementById('final-score-display').innerText = finalScore;
+
+            let predikat = "";
+            let feedback = "";
+
+            if (finalScore >= 85) {
+                predikat = "Sangat Baik (A)";
+                feedback = "Luar biasa! Kamu telah menguasai seluruh konsep Sudut Pusat dan Sudut Keliling Lingkaran dengan sempurna!";
+            } else if (finalScore >= 70) {
+                predikat = "Baik (B)";
+                feedback = "Kerja bagus! Pemahaman kamu tentang sudut lingkaran sudah baik. Pertahankan terus semangat belajarmu!";
+            } else if (finalScore >= 55) {
+                predikat = "Cukup (C)";
+                feedback = "Cukup baik! Kamu sudah memahami dasar-dasar sudut lingkaran. Cobalah mengulas kembali beberapa materi untuk hasil maksimal.";
+            } else {
+                predikat = "Perlu Belajar Lagi (D)";
+                feedback = "Jangan berkecil hati! Pelajari kembali visualisasi interaktif pada Modul 1 dan 2, lalu coba kuis lagi.";
+            }
+
+            document.getElementById('predikat-display').innerText = predikat;
+            document.getElementById('feedback-display').innerText = `"${feedback}"`;
+        }
+
+        /* ===================================================
+           CANVAS HTML5 INTERACTIVE GRAPHICS (MODULE 1 INTERACTIVE POINT CONNECTING)
+           =================================================== */
+        let canvas1, ctx1, canvas2, ctx2;
+
+        // Interactive Points configuration for Module 1
+        const m1Points = {
+            O: { name: "O (Pusat)", x: 180, y: 195, isCenter: true },
+            A: { name: "A", angle: 140, isCenter: false },
+            B: { name: "B", angle: 40, isCenter: false },
+            C: { name: "C", angle: 270, isCenter: false },
+            D: { name: "D", angle: 210, isCenter: false }
+        };
+
+        let selectedM1Points = []; // Stores sequence of selected points, e.g. ['A', 'O', 'B']
+
+        function initCanvases() {
+            canvas1 = document.getElementById('canvas-m1');
+            if (canvas1) {
+                ctx1 = canvas1.getContext('2d');
+                setupM1PointButtons();
+                
+                // Add click listener to canvas 1
+                canvas1.addEventListener('click', handleM1CanvasClick);
+                drawCanvas1();
+            }
+
+            canvas2 = document.getElementById('canvas-m2');
+            if (canvas2) {
+                ctx2 = canvas2.getContext('2d');
+                const sliderPusat2 = document.getElementById('m2-slider-pusat');
+                const sliderPos2 = document.getElementById('m2-slider-pos');
+
+                sliderPusat2.addEventListener('input', drawCanvas2);
+                sliderPos2.addEventListener('input', drawCanvas2);
+                drawCanvas2();
+            }
+        }
+
+        function setupM1PointButtons() {
+            const container = document.getElementById('point-buttons-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            Object.keys(m1Points).forEach(ptKey => {
+                const btn = document.createElement('button');
+                btn.id = `btn-pt-${ptKey}`;
+                btn.className = "px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition border border-slate-600 flex items-center gap-1";
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full ${ptKey === 'O' ? 'bg-red-500' : 'bg-sky-400'}"></span> Titik ${ptKey}`;
+                btn.onclick = () => selectM1Point(ptKey);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleM1CanvasClick(e) {
+            const rect = canvas1.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // Compute actual coordinates of points
+            const cx = canvas1.width / 2;
+            const cy = canvas1.height / 2 + 15;
+            const r = 110;
+
+            let closestPt = null;
+            let minDist = 25; // hit radius
+
+            Object.keys(m1Points).forEach(ptKey => {
+                let px, py;
+                if (m1Points[ptKey].isCenter) {
+                    px = cx;
+                    py = cy;
+                } else {
+                    const rad = (m1Points[ptKey].angle * Math.PI) / 180;
+                    px = cx + r * Math.cos(rad);
+                    py = cy - r * Math.sin(rad);
+                }
+
+                const dist = Math.hypot(clickX - px, clickY - py);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestPt = ptKey;
+                }
+            });
+
+            if (closestPt) {
+                selectM1Point(closestPt);
+            }
+        }
+
+        function selectM1Point(ptKey) {
+            if (selectedM1Points.length >= 3) {
+                selectedM1Points = [ptKey]; // restart selection
+            } else {
+                if (!selectedM1Points.includes(ptKey)) {
+                    selectedM1Points.push(ptKey);
+                }
+            }
+            drawCanvas1();
+            evaluateM1Angle();
+        }
+
+        function resetM1Selection() {
+            selectedM1Points = [];
+            drawCanvas1();
+            evaluateM1Angle();
+        }
+
+        function evaluateM1Angle() {
+            const titleEl = document.getElementById('m1-angle-type-title');
+            const descEl = document.getElementById('m1-angle-type-desc');
+            const boxEl = document.getElementById('m1-detection-box');
+
+            if (selectedM1Points.length < 3) {
+                titleEl.innerText = `Terpilih ${selectedM1Points.length}/3 Titik (${selectedM1Points.join(' - ') || 'Belum Ada'})`;
+                descEl.innerText = "Klik titik tambahan pada lingkaran untuk membentuk sudut utuh.";
+                boxEl.className = "p-4 rounded-xl border transition-all duration-300 bg-slate-800 border-slate-700";
+                return;
+            }
+
+            const [p1, vertex, p2] = selectedM1Points;
+            const angleName = `∠${p1}${vertex}${p2}`;
+
+            if (vertex === 'O') {
+                // Vertex is Center Point O -> Sudut Pusat
+                titleEl.innerText = `${angleName} = SUDUT PUSAT 🎯`;
+                descEl.innerText = `Sempurna! Karena puncak sudut terletak tepat di titik O (Pusat Lingkaran), maka ${angleName} didefinisikan sebagai Sudut Pusat.`;
+                boxEl.className = "p-4 rounded-xl border-2 transition-all duration-300 bg-red-950/60 border-red-500 text-red-200";
+            } else if (vertex !== 'O' && p1 !== 'O' && p2 !== 'O') {
+                // Vertex on circumference and both legs are chords -> Sudut Keliling
+                titleEl.innerText = `${angleName} = SUDUT KELILING 🟢`;
+                descEl.innerText = `Hebat! Puncak sudut (${vertex}) berada di garis keliling lingkaran dan kedua kakinya (${vertex}${p1} & ${vertex}${p2}) adalah tali busur, sehingga ${angleName} merupakan Sudut Keliling.`;
+                boxEl.className = "p-4 rounded-xl border-2 transition-all duration-300 bg-emerald-950/60 border-emerald-500 text-emerald-200";
+            } else {
+                // Formed angle with one leg to center and one to circumference, or other combination
+                titleEl.innerText = `${angleName} = SUDUT SEMBARANG ⚪`;
+                descEl.innerText = `Sudut ${angleName} terbentuk dari garis jari-jari dan tali busur, bukan merupakan sudut keliling murni atau sudut pusat utuh.`;
+                boxEl.className = "p-4 rounded-xl border-2 transition-all duration-300 bg-amber-950/60 border-amber-500 text-amber-200";
+            }
+        }
+
+        // Draw Canvas 1: Interactive Point Connection
+        function drawCanvas1() {
+            if (!ctx1) return;
+            const w = canvas1.width;
+            const h = canvas1.height;
+            const cx = w / 2;
+            const cy = h / 2 + 15;
+            const r = 110;
+
+            ctx1.clearRect(0, 0, w, h);
+
+            // 1. Circle Boundary
+            ctx1.beginPath();
+            ctx1.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx1.strokeStyle = "#475569";
+            ctx1.lineWidth = 3;
+            ctx1.stroke();
+
+            // Calculate exact screen coordinates of all points
+            const coords = {};
+            Object.keys(m1Points).forEach(ptKey => {
+                if (m1Points[ptKey].isCenter) {
+                    coords[ptKey] = { x: cx, y: cy };
+                } else {
+                    const rad = (m1Points[ptKey].angle * Math.PI) / 180;
+                    coords[ptKey] = {
+                        x: cx + r * Math.cos(rad),
+                        y: cy - r * Math.sin(rad)
+                    };
+                }
+            });
+
+            // 2. Draw Drawn Angle Lines if points selected
+            if (selectedM1Points.length >= 2) {
+                const p1 = coords[selectedM1Points[0]];
+                const p2 = coords[selectedM1Points[1]];
+
+                ctx1.beginPath();
+                ctx1.moveTo(p1.x, p1.y);
+                ctx1.lineTo(p2.x, p2.y);
+                ctx1.strokeStyle = "#38bdf8";
+                ctx1.lineWidth = 4;
+                ctx1.stroke();
+            }
+
+            if (selectedM1Points.length === 3) {
+                const p2 = coords[selectedM1Points[1]];
+                const p3 = coords[selectedM1Points[2]];
+
+                ctx1.beginPath();
+                ctx1.moveTo(p2.x, p2.y);
+                ctx1.lineTo(p3.x, p3.y);
+                ctx1.strokeStyle = "#38bdf8";
+                ctx1.lineWidth = 4;
+                ctx1.stroke();
+            }
+
+            // 3. Render Point Nodes
+            Object.keys(m1Points).forEach(ptKey => {
+                const isSelected = selectedM1Points.includes(ptKey);
+                const pt = coords[ptKey];
+                const isCenter = m1Points[ptKey].isCenter;
+
+                ctx1.beginPath();
+                ctx1.arc(pt.x, pt.y, isSelected ? 9 : 6, 0, Math.PI * 2);
+                ctx1.fillStyle = isCenter ? "#ef4444" : (isSelected ? "#fbbf24" : "#38bdf8");
+                ctx1.fill();
+                ctx1.strokeStyle = isSelected ? "#ffffff" : "#0f172a";
+                ctx1.lineWidth = isSelected ? 3 : 2;
+                ctx1.stroke();
+
+                // Point Label Text
+                ctx1.font = "bold 13px Poppins, sans-serif";
+                ctx1.fillStyle = isSelected ? "#fbbf24" : "#ffffff";
+                ctx1.shadowColor = "black";
+                ctx1.shadowBlur = 4;
+                
+                let labelOffsetX = 10;
+                let labelOffsetY = -10;
+                if (ptKey === 'C') labelOffsetY = -12;
+                if (ptKey === 'O') labelOffsetY = 20;
+
+                ctx1.fillText(ptKey, pt.x + labelOffsetX, pt.y + labelOffsetY);
+                ctx1.shadowBlur = 0;
+            });
+
+            // Highlight button states in DOM
+            Object.keys(m1Points).forEach(ptKey => {
+                const btn = document.getElementById(`btn-pt-${ptKey}`);
+                if (btn) {
+                    if (selectedM1Points.includes(ptKey)) {
+                        btn.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs transition border-2 border-yellow-400 shadow-md";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs transition border border-slate-600";
+                    }
+                }
+            });
+        }
+
+        // Draw Canvas 2: Hubungan Sudut Pusat & Keliling (Busur AB Sama Menyala)
+        function drawCanvas2() {
+            if (!ctx2) return;
+            const sliderPusat = document.getElementById('m2-slider-pusat');
+            const sliderPos = document.getElementById('m2-slider-pos');
+
+            const anglePusat = parseFloat(sliderPusat.value);
+            const posPct = parseFloat(sliderPos.value) / 100; // 0 to 1
+            const angleKeliling = anglePusat / 2;
+
+            const w = canvas2.width;
+            const h = canvas2.height;
+            const cx = w / 2;
+            const cy = h / 2 + 15;
+            const r = 110;
+
+            ctx2.clearRect(0, 0, w, h);
+
+            // Calculations for Arc AB at the bottom
+            const halfAngleRad = (anglePusat * Math.PI / 180) / 2;
+            const startAngle = Math.PI / 2 + halfAngleRad;
+            const endAngle = Math.PI / 2 - halfAngleRad;
+
+            const ax = cx + r * Math.cos(startAngle);
+            const ay = cy + r * Math.sin(startAngle);
+            const bx = cx + r * Math.cos(endAngle);
+            const by = cy + r * Math.sin(endAngle);
+
+            // Calculate position of Point P along the major arc (top portion)
+            // Major arc spans from startAngle to endAngle counter-clockwise
+            const majorArcSpan = (Math.PI * 2) - (startAngle - endAngle);
+            const pAngle = startAngle + (posPct * majorArcSpan);
+
+            const px = cx + r * Math.cos(pAngle);
+            const py = cy + r * Math.sin(pAngle);
+
+            // 1. Circle Base Boundary
+            ctx2.beginPath();
+            ctx2.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx2.strokeStyle = "#334155";
+            ctx2.lineWidth = 3;
+            ctx2.stroke();
+
+            // 2. HIGHLIGHT BUSUR AB SAMA (Glowing Gold/Yellow Arc)
+            ctx2.shadowColor = "#f59e0b";
+            ctx2.shadowBlur = 15;
+            ctx2.beginPath();
+            ctx2.arc(cx, cy, r, endAngle, startAngle, false);
+            ctx2.strokeStyle = "#fbbf24"; // Bright Yellow Gold
+            ctx2.lineWidth = 8;
+            ctx2.stroke();
+            ctx2.shadowBlur = 0; // Reset shadow
+
+            // 3. Sudut Pusat Lines (O -> A, O -> B)
+            ctx2.beginPath();
+            ctx2.moveTo(ax, ay);
+            ctx2.lineTo(cx, cy);
+            ctx2.lineTo(bx, by);
+            ctx2.strokeStyle = "#ef4444"; // Red
+            ctx2.lineWidth = 3;
+            ctx2.stroke();
+
+            // Sudut Pusat Arc Fill
+            ctx2.beginPath();
+            ctx2.moveTo(cx, cy);
+            ctx2.arc(cx, cy, 35, endAngle, startAngle, false);
+            ctx2.closePath();
+            ctx2.fillStyle = "rgba(239, 68, 68, 0.3)";
+            ctx2.fill();
+
+            // 4. Sudut Keliling Lines (P -> A, P -> B)
+            ctx2.beginPath();
+            ctx2.moveTo(ax, ay);
+            ctx2.lineTo(px, py);
+            ctx2.lineTo(bx, by);
+            ctx2.strokeStyle = "#10b981"; // Emerald Green
+            ctx2.lineWidth = 3;
+            ctx2.stroke();
+
+            // 5. Points with Labels
+            drawPoint(ctx2, cx, cy, "O (Pusat)", "#ffffff");
+            drawPoint(ctx2, ax, ay, "A", "#fbbf24");
+            drawPoint(ctx2, bx, by, "B", "#fbbf24");
+            drawPoint(ctx2, px, py, `P (${angleKeliling.toFixed(0)}°)`, "#10b981");
+
+            // Text Label Overlay Inside Canvas
+            ctx2.font = "bold 13px Poppins, sans-serif";
+            ctx2.fillStyle = "#ef4444";
+            ctx2.fillText(`Pusat: ${anglePusat}°`, cx - 30, cy + 24);
+
+            ctx2.fillStyle = "#fbbf24";
+            ctx2.fillText(`BUSUR AB SAMA`, cx - 45, cy + r - 15);
+
+            // Update UI elements safely
+            const elemPusatSlider = document.getElementById('m2-val-pusat-slider');
+            if (elemPusatSlider) elemPusatSlider.innerText = `${anglePusat}°`;
+
+            const elemPusat = document.getElementById('m2-val-pusat');
+            if (elemPusat) elemPusat.innerText = `${anglePusat}°`;
+
+            const elemKeliling = document.getElementById('m2-val-keliling');
+            if (elemKeliling) elemKeliling.innerText = `${angleKeliling.toFixed(1)}°`;
+
+            let posLabel = "Posisi Atas";
+            if (posPct < 0.35) posLabel = "Posisi Kiri";
+            else if (posPct > 0.65) posLabel = "Posisi Kanan";
+            
+            const elemPosSlider = document.getElementById('m2-val-pos-slider');
+            if (elemPosSlider) elemPosSlider.innerText = posLabel;
+        }
+
+        // Helper to draw points with text labels on HTML5 canvas
+        function drawPoint(ctx, x, y, label, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.font = "bold 12px Poppins, sans-serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 4;
+            ctx.fillText(label, x + 8, y - 8);
+            ctx.shadowBlur = 0; // reset
+        }
+    </script>
+</body>
+</html>
